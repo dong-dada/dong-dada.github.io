@@ -7,9 +7,9 @@ categories: none
 
 本文从各种角度讨论 Protobuf 值得关注的点。
 
-# 编码
+## 编码
 
-## Protoscope 工具
+### Protoscope 工具
 
 [Protoscope](https://github.com/protocolbuffers/protoscope) 工具可以把编码后的 PB 数据用人类可读的方式展示出来：
 
@@ -42,12 +42,12 @@ $ protoscope -explicit-wire-types -explicit-length-prefixes person.pb
 3:LEN 17 "hello@outlook.com"
 ```
 
-## Proto2 和 Proto3 的编码格式是相同的
+### Proto2 和 Proto3 的编码格式是相同的
 
 Proto2 和 Proto3 在语法上有差异，但在编码格式上是相同的，这意味着可以平滑地把语法从 Proto2 升级到 Proto3。
 
 
-## Protobuf 编码不具备自解释性
+### Protobuf 编码不具备自解释性
 
 完整的编码格式参考 [Protobuf 官网](https://protobuf.dev/programming-guides/encoding/)，这里讨论它的一些特点：
 
@@ -112,7 +112,7 @@ $ protoscope -explicit-wire-types -explicit-length-prefixes person.pb
 
 不具备自解释性，使得我们无法编写直接将 PB 数据转换为 json 或者 map 之类的转换器，在处理 PB 数据时必须有 proto 文件才可以。比如 [pbjson](https://github.com/yinqiwen/pbjson/blob/master/test/test.cpp) 这个 C++ 库，它提供的 pb2json 方法需要传入 PB message 对象才可以做解析。
 
-## Protobuf 编码不是稳定的
+### Protobuf 编码不是稳定的
 
 就是说相同内容的 PB 对象编码后不一定会产生相同的数据，[这篇文章](https://protobuf.dev/programming-guides/serialization-not-canonical/) 解释了为什么设计成这样。
 
@@ -143,7 +143,7 @@ bool pb_equal(std::string_view lhs, std::string_view rhs) {
 
 显然由于不稳定性无法直接从编码后的 PB 数据计算 hash，对于解码后的 PB message 对象，Protobuf 也没有提供计算 hash 的方法。我理解针对 message 对象做 hash 是可以办到的，只是需要明确规定对于 unknown field, default value 的处理方式。
 
-## Protobuf 编码没有定界符
+### Protobuf 编码没有定界符
 
 [这篇文章](https://protobuf.dev/programming-guides/techniques/#streaming) 介绍了这件事。
 
@@ -151,7 +151,7 @@ bool pb_equal(std::string_view lhs, std::string_view rhs) {
 
 这也意味着 PB 解码的时候，传入不完整的数据或者超长的数据，解码不一定会失败。我们不能根据解码是否成功来判断 PB 数据的完整性，必须依靠额外的定界符来判断。
 
-## Protobuf 编码的尺寸限制
+### Protobuf 编码的尺寸限制
 
 [Encoding](https://protobuf.dev/programming-guides/encoding/) 这篇文章中说明了编码时的尺寸限制：
 - string, bytes 类型的字段，单个字段不能超过 2GB
@@ -160,9 +160,9 @@ bool pb_equal(std::string_view lhs, std::string_view rhs) {
 [这篇文章](https://protobuf.dev/overview/#not-good-fit) 提到 Protobuf 不适合存储超过 MB 级别的数据。在 C++ 中，PB 消息的 string, bytes 字段是通过 `std::string` 来存储的，因此编解码过程会产生拷贝开销。在 MB 级别数据量的情况下，拷贝开销可以达到 ms 级别，导致编解码性能大受影响。
 
 
-# 用法
+## 用法
 
-## google.protobuf.Any
+### google.protobuf.Any
 
 `google.protobuf.Any` 可以存储任意类型的消息，使用方法:
 
@@ -203,7 +203,7 @@ message Any {
 
 [这篇文章](https://protobuf.dev/programming-guides/techniques/#self-description) 提到了使用 Any 和 FileDescriptorSet 实现自解释消息的思路。虽然 Protobuf 编码格式自身不具备自解释性，但是可以把描述信息(也就是 .proto 文件定义的内容)也编码到数据内，使得编码后的数据能够通过反射的方式进行访问。
 
-## google.protobuf.Struct
+### google.protobuf.Struct
 
 `google.protobuf.Struct` 可以实现像 json 那样的效果，它的定义就是一个 map:
 
