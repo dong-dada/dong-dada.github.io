@@ -1,9 +1,11 @@
 ---
 layout: post
-title:  "Protocol Buffer 分析"
+title:  "Protocol Buffer 学习"
 date:   2024-08-21 10:57:19 +0800
-categories: none
 ---
+
+* TOC
+{:toc}
 
 本文从各种角度讨论 Protobuf 值得关注的点。
 
@@ -510,7 +512,7 @@ public:
 };
 ```
 
-值得注意的是用户可以自己实现 `ZeroCopyOutputStream` 接口，随后调用 `SerializeToZeroCopyStream()` 进行序列化，从而自定义内存分配过程。比如可以只分配一个 8KB 的内存块，下次`Next()`被调用的时候先把内存块的数据写文件，再复用这个内存块。再比如每次 `Next()` 被调用都分配一块新的内存，最后把 PB 消息序列化到多块内存上。
+值得注意的是用户可以自己实现 `ZeroCopyOutputStream` 接口，随后调用 `SerializeToZeroCopyStream()` 进行序列化，从而自定义内存分配过程。比如可以每次 `Next()` 被调用都分配一块新的内存，最后把 PB 消息序列化到多块内存上。
 
 
 ### Parse 接口
