@@ -55,12 +55,3 @@ plugins:
 
 header_pages:
   - portfolio.md
-
-comments:
-  active: giscus
-  giscus:
-    repo: "dong-dada/dong-dada.github.io"
-    repo_id: "R_kgDOMmKAUg"
-    category: "Comments"
-    category_id: "DIC_kwDOMmKAUs4Ch6E0"
-    mapping: "pathname"
