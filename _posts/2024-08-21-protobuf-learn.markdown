@@ -475,7 +475,7 @@ class MessageLite {
 
 这些序列化方法的输出各有不同，但最终都会转换为 `io::EpsCopyOutputStream` 传入给 PB 对象的 `_InternalSerialize()` 方法。
 
-```mermaid
+```mermaid!
 classDiagram
 
 class ZeroCopyOutputStream {
