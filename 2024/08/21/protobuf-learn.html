@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Protocol Buffer 学习 | 董哒哒</title>
+<meta name="generator" content="Jekyll v4.3.3">
+<meta property="og:title" content="Protocol Buffer 学习">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="我哒哒的马蹄是美丽的错误，我不是归人，是个过客">
+<meta property="og:description" content="我哒哒的马蹄是美丽的错误，我不是归人，是个过客">
+<link rel="canonical" href="/2024/08/21/protobuf-learn.html">
+<meta property="og:url" content="/2024/08/21/protobuf-learn.html">
+<meta property="og:site_name" content="董哒哒">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2024-08-21T02:57:19+00:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="Protocol Buffer 学习">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2024-08-21T02:57:19+00:00","datePublished":"2024-08-21T02:57:19+00:00","description":"我哒哒的马蹄是美丽的错误，我不是归人，是个过客","headline":"Protocol Buffer 学习","mainEntityOfPage":{"@type":"WebPage","@id":"/2024/08/21/protobuf-learn.html"},"url":"/2024/08/21/protobuf-learn.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css">
+<link type="application/atom+xml" rel="alternate" href="/feed.xml" title="董哒哒">
+</head>
+<body>
+<header class="site-header" role="banner">
+
+  <div class="wrapper">
+<a class="site-title" rel="author" href="/">董哒哒</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewbox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"></div>
+      </nav>
+</div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Protocol Buffer 学习</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2024-08-21T02:57:19+00:00" itemprop="datePublished">Aug 21, 2024
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <ul id="markdown-toc">
+  <li>
+<a href="#%E7%BC%96%E7%A0%81" id="markdown-toc-编码">编码</a>    <ul>
+      <li><a href="#protoscope-%E5%B7%A5%E5%85%B7" id="markdown-toc-protoscope-工具">Protoscope 工具</a></li>
+      <li><a href="#proto2-%E5%92%8C-proto3-%E7%9A%84%E7%BC%96%E7%A0%81%E6%A0%BC%E5%BC%8F%E6%98%AF%E7%9B%B8%E5%90%8C%E7%9A%84" id="markdown-toc-proto2-和-proto3-的编码格式是相同的">Proto2 和 Proto3 的编码格式是相同的</a></li>
+      <li><a href="#protobuf-%E7%BC%96%E7%A0%81%E4%B8%8D%E5%85%B7%E5%A4%87%E8%87%AA%E8%A7%A3%E9%87%8A%E6%80%A7" id="markdown-toc-protobuf-编码不具备自解释性">Protobuf 编码不具备自解释性</a></li>
+      <li><a href="#protobuf-%E7%BC%96%E7%A0%81%E4%B8%8D%E6%98%AF%E7%A8%B3%E5%AE%9A%E7%9A%84" id="markdown-toc-protobuf-编码不是稳定的">Protobuf 编码不是稳定的</a></li>
+      <li><a href="#protobuf-%E7%BC%96%E7%A0%81%E6%B2%A1%E6%9C%89%E5%AE%9A%E7%95%8C%E7%AC%A6" id="markdown-toc-protobuf-编码没有定界符">Protobuf 编码没有定界符</a></li>
+      <li><a href="#protobuf-%E7%BC%96%E7%A0%81%E7%9A%84%E5%B0%BA%E5%AF%B8%E9%99%90%E5%88%B6" id="markdown-toc-protobuf-编码的尺寸限制">Protobuf 编码的尺寸限制</a></li>
+    </ul>
+  </li>
+  <li>
+<a href="#%E7%94%A8%E6%B3%95" id="markdown-toc-用法">用法</a>    <ul>
+      <li><a href="#googleprotobufany" id="markdown-toc-googleprotobufany">google.protobuf.Any</a></li>
+      <li><a href="#googleprotobufstruct" id="markdown-toc-googleprotobufstruct">google.protobuf.Struct</a></li>
+      <li><a href="#options" id="markdown-toc-options">Options</a></li>
+      <li><a href="#reflection" id="markdown-toc-reflection">Reflection</a></li>
+    </ul>
+  </li>
+  <li>
+<a href="#%E6%BA%90%E7%A0%81" id="markdown-toc-源码">源码</a>    <ul>
+      <li><a href="#%E6%95%B0%E6%8D%AE%E7%9A%84%E5%AD%98%E5%82%A8" id="markdown-toc-数据的存储">数据的存储</a></li>
+      <li><a href="#%E7%BC%96%E8%A7%A3%E7%A0%81" id="markdown-toc-编解码">编解码</a></li>
+      <li><a href="#serialize-%E6%8E%A5%E5%8F%A3" id="markdown-toc-serialize-接口">Serialize 接口</a></li>
+      <li><a href="#parse-%E6%8E%A5%E5%8F%A3" id="markdown-toc-parse-接口">Parse 接口</a></li>
+    </ul>
+  </li>
+</ul>
+
+<p>本文从各种角度讨论 Protobuf 值得关注的点。</p>
+
+<h2 id="编码">编码</h2>
+
+<h3 id="protoscope-工具">Protoscope 工具</h3>
+
+<p><a href="https://github.com/protocolbuffers/protoscope">Protoscope</a> 工具可以把编码后的 PB 数据用人类可读的方式展示出来：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// 定义 proto
+syntax = "proto3";
+
+message Person {
+  int32 id = 1;
+  string name = 2;
+  string email = 3;
+}
+
+// 创建 PB 对象并序列化到 person.pb 文件
+int main() {
+  Person person;
+  person.set_id(42);
+  person.set_name("alice");
+  person.set_email("hello@outlook.com");
+
+  std::cout &lt;&lt; person.SerializeAsString();
+
+  return 0;
+}
+
+// 使用 protoscope 工具查看
+$ protoscope -explicit-wire-types -explicit-length-prefixes person.pb
+1:VARINT 42
+2:LEN 5 "alice"
+3:LEN 17 "hello@outlook.com"
+</code></pre></div></div>
+
+<h3 id="proto2-和-proto3-的编码格式是相同的">Proto2 和 Proto3 的编码格式是相同的</h3>
+
+<p>Proto2 和 Proto3 在语法上有差异，但在编码格式上是相同的，这意味着可以平滑地把语法从 Proto2 升级到 Proto3。</p>
+
+<h3 id="protobuf-编码不具备自解释性">Protobuf 编码不具备自解释性</h3>
+
+<p>完整的编码格式参考 <a href="https://protobuf.dev/programming-guides/encoding/">这篇文章</a>，这里讨论它的一些特点：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>message    := (tag value)*
+
+tag        := (field &lt;&lt; 3) bit-or wire_type;
+                encoded as uint32 varint
+value      := varint      for wire_type == VARINT,
+              i32         for wire_type == I32,
+              i64         for wire_type == I64,
+              len-prefix  for wire_type == LEN,
+              &lt;empty&gt;     for wire_type == SGROUP or EGROUP
+</code></pre></div></div>
+
+<p>可以看出这里的编码思路是将 message 的每个字段编码为 <code class="language-plaintext highlighter-rouge">wire_type-field_number-value</code> 的形式。其中 <code class="language-plaintext highlighter-rouge">wire_type</code> 指明了 value 采用何种编码方式，<code class="language-plaintext highlighter-rouge">field_number</code> 就是 message 中字段的序号, <code class="language-plaintext highlighter-rouge">value</code> 是具体的值。</p>
+
+<p>值得注意的是 <code class="language-plaintext highlighter-rouge">wire_type</code> 并不是跟具体的类型相关的，比如 I32 既可以是 fixed32 也可以是 float，LEN 既可以表示 string 也可以表示内嵌消息，这意味着 Protobuf 的编码格式不具备“自解释性”。</p>
+
+<p>这一点可以从 protoscope 工具看出：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// 定义 proto, 注意内嵌消息
+syntax = "proto3";
+
+message Person {
+  int32 id = 1;
+  string name = 2;
+  string email = 3;
+
+  message PhoneNumber {
+    string number = 1;
+    string code = 2;
+  }
+
+  PhoneNumber phone = 4;
+}
+
+// 创建 PB 对象并序列化
+int main() {
+  Person person;
+  person.set_id(42);
+  person.set_name("alice");
+  person.set_email("hello@outlook.com");
+  person.mutable_phone()-&gt;set_number("12345678900");
+  person.mutable_phone()-&gt;set_code("86");
+
+  std::cout &lt;&lt; person.SerializeAsString();
+}
+
+// 使用 protoscope 工具查看，它没能正确识别内嵌消息
+$ protoscope -explicit-wire-types -explicit-length-prefixes person.pb
+1:VARINT 42
+2:LEN 5 "alice"
+3:LEN 17 "hello@outlook.com"
+4:LEN 17
+  1:LEN 11
+    6:I64 4.663768570166562e-33   # 0x3938373635343332i64
+    6:VARINT 48
+  2:LEN 2 7:VARINT 54
+</code></pre></div></div>
+
+<p>不具备自解释性，使得我们无法编写直接将 PB 数据转换为 json 或者 map 之类的转换器，在处理 PB 数据时必须有 proto 文件才可以。比如 <a href="https://github.com/yinqiwen/pbjson/blob/master/test/test.cpp">pbjson</a> 这个 C++ 库，它提供的 pb2json 方法需要传入 PB message 对象才可以做解析。</p>
+
+<h3 id="protobuf-编码不是稳定的">Protobuf 编码不是稳定的</h3>
+
+<p>就是说相同内容的 PB 对象编码后不一定会产生相同的数据，会有顺序的差别，<a href="https://protobuf.dev/programming-guides/serialization-not-canonical/">这篇文章</a> 解释了为什么设计成这样。</p>
+
+<p>由于编码不稳定，在做比较的时候不能直接比较编码后数据，只能解码之后通过 PB 对象进行比较：</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">&lt;google/protobuf/util/message_differencer.h&gt;</span><span class="cp">
+</span>
+<span class="k">using</span> <span class="n">google</span><span class="o">::</span><span class="n">protobuf</span><span class="o">::</span><span class="n">util</span><span class="o">::</span><span class="n">MessageDifferencer</span><span class="p">;</span>
+
+<span class="kt">bool</span> <span class="nf">pb_equal</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string_view</span> <span class="n">lhs</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">string_view</span> <span class="n">rhs</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// 直接比较是不行的</span>
+    <span class="c1">// return lhs == rhs;</span>
+
+    <span class="k">auto</span> <span class="n">lhs_obj</span> <span class="o">=</span> <span class="n">Person</span><span class="o">::</span><span class="n">ParseFromString</span><span class="p">(</span><span class="n">lhs</span><span class="p">);</span>
+    <span class="k">auto</span> <span class="n">rhs_obj</span> <span class="o">=</span> <span class="n">Person</span><span class="o">::</span><span class="n">ParseFromString</span><span class="p">(</span><span class="n">rhs</span><span class="p">);</span>
+
+    <span class="c1">// 使用 DebugString 进行比较也是不行的</span>
+    <span class="c1">// return lhs_obj.DebugString() == rhs_obj.DebugString();</span>
+
+    <span class="c1">// 应当使用 MessageDifferencer 工具类进行比较</span>
+    <span class="c1">// MessageDifferencer 还提供了 Equivalent(), </span>
+    <span class="c1">// ApproximatelyEquals(), ApproximatelyEquivalent() 等方法，</span>
+    <span class="c1">// 适合不同场景，使用的时候再看看</span>
+    <span class="k">return</span> <span class="n">MessageDifferencer</span><span class="o">::</span><span class="n">Equals</span><span class="p">(</span><span class="n">alice</span><span class="p">,</span> <span class="n">bob</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>显然由于不稳定性无法直接从编码后的 PB 数据计算 hash，对于解码后的 PB message 对象，Protobuf 也没有提供计算 hash 的方法。我理解针对 message 对象做 hash 是可以办到的，只是需要明确规定对于 unknown field, default value 的处理方式。</p>
+
+<h3 id="protobuf-编码没有定界符">Protobuf 编码没有定界符</h3>
+
+<p><a href="https://protobuf.dev/programming-guides/techniques/#streaming">这篇文章</a> 介绍了这件事。</p>
+
+<p>因此流式传输的时候需要添加额外的长度字段来标记一份 PB 数据的开始和结束。</p>
+
+<p>这也意味着 PB 解码的时候，传入不完整的数据或者超长的数据，解码不一定会失败。我们不能根据解码是否成功来判断 PB 数据的完整性，必须依靠额外的定界符来判断。</p>
+
+<h3 id="protobuf-编码的尺寸限制">Protobuf 编码的尺寸限制</h3>
+
+<p><a href="https://protobuf.dev/programming-guides/encoding/">Encoding</a> 这篇文章中说明了编码时的尺寸限制：</p>
+<ul>
+  <li>string, bytes 类型的字段，单个字段不能超过 2GB</li>
+  <li>message 整体不能超过 2GB</li>
+</ul>
+
+<p>之所以是 2GB 是因为 LEN 类型的 wire_type 使用 int32 类型的 VARINT 来存储长度信息。</p>
+
+<p><a href="https://protobuf.dev/overview/#not-good-fit">这篇文章</a> 提到 Protobuf 不适合存储超过 MB 级别的数据。在 C++ 中，PB 消息的 string, bytes 字段是通过 <code class="language-plaintext highlighter-rouge">std::string</code> 来存储的，因此编解码过程会产生拷贝开销。在 MB 级别数据量的情况下，拷贝开销可以达到 ms 级别，导致编解码性能大受影响。</p>
+
+<p><a href="https://groups.google.com/g/protobuf/c/eNQ02xdhOAE">Protobuf 的讨论组</a> 提到让 string 类型支持 <code class="language-plaintext highlighter-rouge">std::string_view</code> 的事情，用来避免拷贝开销，目前还没有支持。</p>
+
+<h2 id="用法">用法</h2>
+
+<h3 id="googleprotobufany">google.protobuf.Any</h3>
+
+<p><code class="language-plaintext highlighter-rouge">google.protobuf.Any</code> 可以存储任意类型的消息，使用方法:</p>
+
+<div class="language-proto highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="s">"google/protobuf/any.proto"</span><span class="p">;</span>
+
+<span class="kd">message</span> <span class="nc">Error</span> <span class="p">{</span>
+  <span class="kt">string</span> <span class="kd">message</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="n">google.protobuf.Any</span> <span class="na">detail</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 把任意消息编码到 any 字段当中</span>
+<span class="n">NetworkErrorDetail</span> <span class="n">detail</span> <span class="o">=</span> <span class="p">...;</span>
+<span class="n">Error</span> <span class="n">error</span><span class="p">;</span>
+<span class="n">status</span><span class="p">.</span><span class="n">mutable_detail</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">PackFrom</span><span class="p">(</span><span class="n">detail</span><span class="p">);</span>
+
+<span class="c1">// ...</span>
+
+<span class="c1">// 从 any 字段中解码出原始消息</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">status</span><span class="p">.</span><span class="n">detail</span><span class="p">().</span><span class="n">Is</span><span class="o">&lt;</span><span class="n">NetworkErrorDetail</span><span class="o">&gt;</span><span class="p">())</span> <span class="p">{</span>
+    <span class="n">NetworkErrorDetail</span> <span class="n">detail</span><span class="p">;</span>
+    <span class="n">status</span><span class="p">.</span><span class="n">detail</span><span class="p">().</span><span class="n">UnpackTo</span><span class="p">(</span><span class="o">&amp;</span><span class="n">detail</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>从 <code class="language-plaintext highlighter-rouge">google.protobuf.Any</code> 消息的定义可以很容易地理解它的工作原理，它只是把任意消息编码为 bytes 存储而已：</p>
+
+<div class="language-proto highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">google</span><span class="o">.</span><span class="n">protobuf</span><span class="p">;</span>
+
+<span class="kd">message</span> <span class="nc">Any</span> <span class="p">{</span>
+  <span class="kt">string</span> <span class="na">type_url</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>      <span class="c1">// 原始消息的类型</span>
+  <span class="kt">bytes</span> <span class="na">value</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>          <span class="c1">// 编码后的消息</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><a href="https://protobuf.dev/programming-guides/techniques/#self-description">这篇文章</a> 提到了使用 Any 和 FileDescriptorSet 实现自解释消息的思路。虽然 Protobuf 编码格式自身不具备自解释性，但是可以把描述信息(也就是 .proto 文件定义的内容)也编码到数据内，使得编码后的数据能够通过反射的方式进行访问。</p>
+
+<h3 id="googleprotobufstruct">google.protobuf.Struct</h3>
+
+<p><code class="language-plaintext highlighter-rouge">google.protobuf.Struct</code> 可以实现像 json 那样的效果，它的定义就是一个 map:</p>
+
+<div class="language-proto highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">message</span> <span class="nc">Struct</span> <span class="p">{</span>
+  <span class="n">map</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span> <span class="n">Value</span><span class="err">&gt;</span> <span class="na">fields</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">message</span> <span class="nc">Value</span> <span class="p">{</span>
+  <span class="k">oneof</span> <span class="n">kind</span> <span class="p">{</span>
+    <span class="n">NullValue</span> <span class="na">null_value</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="kt">double</span> <span class="na">number_value</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+    <span class="kt">string</span> <span class="na">string_value</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+    <span class="kt">bool</span> <span class="na">bool_value</span> <span class="o">=</span> <span class="mi">4</span><span class="p">;</span>
+    <span class="n">Struct</span> <span class="na">struct_value</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+    <span class="n">ListValue</span> <span class="na">list_value</span> <span class="o">=</span> <span class="mi">6</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="options">Options</h3>
+
+<p><a href="https://protobuf.dev/programming-guides/proto3/#options">这篇文章</a> 提到 Protobuf 支持在 proto 文件中定义选项:</p>
+
+<div class="language-proto highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">syntax</span> <span class="o">=</span> <span class="s">"proto3"</span><span class="p">;</span>
+
+<span class="c1">// 文件级别的 option</span>
+<span class="k">option</span> <span class="na">c_enable_arenas</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+
+<span class="kd">message</span> <span class="nc">Person</span> <span class="p">{</span>
+  <span class="c1">// 消息级别的 option</span>
+  <span class="k">option</span> <span class="na">deprecated</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+
+  <span class="kt">int32</span> <span class="na">id</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="kt">string</span> <span class="na">name</span> <span class="o">=</span> <span class="mi">2</span> <span class="p">[</span><span class="na">deprecated</span> <span class="o">=</span> <span class="kc">true</span><span class="p">];</span> <span class="c1">// 字段级别的 option</span>
+  <span class="kt">string</span> <span class="na">email</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>值得注意的是 <a href="https://github.com/bufbuild/protovalidate">protovalidate</a> 这个项目，使用它可以在 proto 文件中加入一些校验用的 option，protoc 在生成目标代码的时候会产生额外的校验信息，可以验证消息是否满足要求：</p>
+
+<div class="language-proto highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">syntax</span> <span class="o">=</span> <span class="s">"proto3"</span><span class="p">;</span>
+
+<span class="k">import</span> <span class="s">"buf/validate/validate.proto"</span><span class="p">;</span>
+
+<span class="kd">message</span> <span class="nc">Transaction</span> <span class="p">{</span>
+  <span class="c1">// 要求 id 值大于 999</span>
+  <span class="kt">uint64</span> <span class="na">id</span> <span class="o">=</span> <span class="mi">1</span> <span class="p">[(</span><span class="n">buf.validate.field</span><span class="p">)</span><span class="o">.</span><span class="kt">uint64</span><span class="o">.</span><span class="na">gt</span> <span class="o">=</span> <span class="mi">999</span><span class="p">];</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+</span>
+<span class="cp">#include</span> <span class="cpf">"buf/validate/validator.h"</span><span class="cp">
+#include</span> <span class="cpf">"path/to/generated/protos/transaction.pb.h"</span><span class="cp">
+</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">my</span><span class="o">::</span><span class="n">package</span><span class="o">::</span><span class="n">Transaction</span> <span class="n">transaction</span><span class="p">;</span>
+  <span class="n">transaction</span><span class="p">.</span><span class="n">set_id</span><span class="p">(</span><span class="mi">1234</span><span class="p">);</span>
+
+  <span class="k">auto</span> <span class="n">factory</span> <span class="o">=</span> <span class="n">buf</span><span class="o">::</span><span class="n">validate</span><span class="o">::</span><span class="n">ValidatorFactory</span><span class="o">::</span><span class="n">New</span><span class="p">().</span><span class="n">value</span><span class="p">();</span>
+  <span class="k">auto</span> <span class="n">validator</span> <span class="o">=</span> <span class="n">factory</span><span class="o">-&gt;</span><span class="n">NewValidator</span><span class="p">();</span>
+
+  <span class="c1">// 校验</span>
+  <span class="k">auto</span> <span class="n">results</span> <span class="o">=</span> <span class="n">validator</span><span class="p">.</span><span class="n">Validate</span><span class="p">(</span><span class="n">transaction</span><span class="p">).</span><span class="n">value</span><span class="p">();</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">results</span><span class="p">.</span><span class="n">violations_size</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"validation failed"</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"validation succeeded"</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="reflection">Reflection</h3>
+
+<p>通过反射可以在不知道具体类型的情况下访问 PB 对象，比如 pb 转 json 之类的场景就很适合用这种方式:</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">JsonValue</span> <span class="nf">pb2json</span><span class="p">(</span><span class="k">const</span> <span class="n">Message</span><span class="o">&amp;</span> <span class="n">message</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// Descriptor 描述了消息的静态信息(有哪些字段，每个字段什么类型)</span>
+  <span class="c1">// Reflection 记录了消息的动态信息(字段的具体值是什么)</span>
+  <span class="k">auto</span> <span class="n">descriptor</span> <span class="o">=</span> <span class="n">message</span><span class="p">.</span><span class="n">GetDescriptor</span><span class="p">();</span>
+  <span class="k">auto</span> <span class="n">reflection</span> <span class="o">=</span> <span class="n">message</span><span class="p">.</span><span class="n">GetReflection</span><span class="p">();</span>
+
+  <span class="n">JsonMap</span> <span class="n">json</span><span class="p">;</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">field_count</span><span class="p">();</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">auto</span> <span class="n">field</span> <span class="o">=</span> <span class="n">descriptor</span><span class="o">-&gt;</span><span class="n">field</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+
+    <span class="k">auto</span> <span class="n">key</span> <span class="o">=</span> <span class="n">field</span><span class="o">-&gt;</span><span class="n">name</span><span class="p">();</span>
+
+    <span class="k">switch</span> <span class="p">(</span><span class="n">field</span><span class="o">-&gt;</span><span class="n">cpp_type</span><span class="p">())</span> <span class="p">{</span>
+      <span class="k">case</span> <span class="n">FieldDescriptor</span><span class="o">::</span><span class="n">CPPTYPE_BOOL</span><span class="p">:</span>
+        <span class="n">json</span><span class="p">.</span><span class="n">addBool</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">reflection</span><span class="o">-&gt;</span><span class="n">GetBool</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">field</span><span class="p">));</span>
+        <span class="k">break</span><span class="p">;</span>
+      <span class="k">case</span> <span class="n">FieldDescriptor</span><span class="o">::</span><span class="n">CPPTYPE_INT32</span><span class="p">:</span>
+        <span class="n">json</span><span class="p">.</span><span class="n">addInt</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">reflection</span><span class="o">-&gt;</span><span class="n">GetInt32</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">field</span><span class="p">));</span>
+        <span class="k">break</span><span class="p">;</span>
+      <span class="k">case</span> <span class="n">FieldDescriptor</span><span class="o">::</span><span class="n">CPPTYPE_MESSAGE</span><span class="p">:</span>
+        <span class="n">json</span><span class="p">.</span><span class="n">addValue</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">pb2json</span><span class="p">(</span><span class="n">reflection</span><span class="o">-&gt;</span><span class="n">GetMessage</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">field</span><span class="p">)));</span>
+        <span class="k">break</span><span class="p">;</span>
+        <span class="c1">// ...</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="n">json</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="源码">源码</h2>
+
+<h3 id="数据的存储">数据的存储</h3>
+
+<p>从 .proto 文件生成的 PB 对象会有相应字段来存储数据：</p>
+
+<div class="language-proto highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">message</span> <span class="nc">Person</span> <span class="p">{</span>
+  <span class="kt">int32</span> <span class="na">id</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="kt">string</span> <span class="na">name</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+  <span class="kt">string</span> <span class="na">email</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+
+  <span class="kd">message</span> <span class="nc">PhoneNumber</span>
+  <span class="p">{</span>
+    <span class="kt">string</span> <span class="na">zip_code</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="kt">string</span> <span class="na">number</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="n">PhoneNumber</span> <span class="na">phone</span> <span class="o">=</span> <span class="mi">4</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Person_PhoneNumber</span> <span class="k">final</span> <span class="o">:</span> <span class="k">public</span> <span class="o">::</span><span class="n">PROTOBUF_NAMESPACE_ID</span><span class="o">::</span><span class="n">Message</span> <span class="p">{</span>
+<span class="nl">private:</span>
+  <span class="n">internal</span><span class="o">::</span><span class="n">ArenaStringPtr</span> <span class="n">zip_code_</span><span class="p">;</span>
+  <span class="n">internal</span><span class="o">::</span><span class="n">ArenaStringPtr</span> <span class="n">number_</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">class</span> <span class="nc">Person</span> <span class="k">final</span> <span class="o">:</span> <span class="k">public</span> <span class="o">::</span><span class="n">PROTOBUF_NAMESPACE_ID</span><span class="o">::</span><span class="n">Message</span> <span class="p">{</span>
+<span class="nl">private:</span>
+  <span class="n">int32</span> <span class="n">id_</span><span class="p">;</span>
+  <span class="n">internal</span><span class="o">::</span><span class="n">ArenaStringPtr</span> <span class="n">name_</span><span class="p">;</span>
+  <span class="n">internal</span><span class="o">::</span><span class="n">ArenaStringPtr</span> <span class="n">email_</span><span class="p">;</span>
+  <span class="o">::</span><span class="n">Person_PhoneNumber</span><span class="o">*</span> <span class="n">phone_</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>其中 ArenaStringPtr 跟 <a href="https://protobuf.dev/reference/cpp/arenas/">Arena 机制</a> 有关，没开启 arena 的话可以认为它是一个 <code class="language-plaintext highlighter-rouge">std::string</code> 指针。</p>
+
+<h3 id="编解码">编解码</h3>
+
+<p>生成的 PB 对象中有相应的编解码方法，当调用父类 <code class="language-plaintext highlighter-rouge">google::protobuf::MessageLite</code> 的编解码方法时，会触发 PB 对象的编解码方法:</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Person</span> <span class="k">final</span> <span class="o">:</span> <span class="k">public</span> <span class="o">::</span><span class="n">PROTOBUF_NAMESPACE_ID</span><span class="o">::</span><span class="n">Message</span> <span class="p">{</span>
+<span class="nl">public:</span>
+  <span class="kt">size_t</span> <span class="n">ByteSizeLong</span><span class="p">()</span> <span class="k">const</span> <span class="k">final</span><span class="p">;</span>
+  <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">_InternalParse</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">ptr</span><span class="p">,</span> <span class="n">internal</span><span class="o">::</span><span class="n">ParseContext</span><span class="o">*</span> <span class="n">ctx</span><span class="p">)</span> <span class="k">final</span><span class="p">;</span>
+  <span class="n">uint8</span><span class="o">*</span> <span class="n">_InternalSerialize</span><span class="p">(</span><span class="n">uint8</span><span class="o">*</span> <span class="n">target</span><span class="p">,</span> <span class="n">io</span><span class="o">::</span><span class="n">EpsCopyOutputStream</span><span class="o">*</span> <span class="n">stream</span><span class="p">)</span> <span class="k">const</span> <span class="k">final</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">uint8</span><span class="o">*</span> <span class="n">Person</span><span class="o">::</span><span class="n">_InternalSerialize</span><span class="p">(</span><span class="n">uint8</span><span class="o">*</span> <span class="n">target</span><span class="p">,</span> <span class="n">io</span><span class="o">::</span><span class="n">EpsCopyOutputStream</span><span class="o">*</span> <span class="n">stream</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">stream</span><span class="o">-&gt;</span><span class="n">EnsureSpace</span><span class="p">(</span><span class="n">target</span><span class="p">);</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">internal</span><span class="o">::</span><span class="n">WireFormatLite</span><span class="o">::</span><span class="n">WriteInt32ToArray</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">_internal_id</span><span class="p">(),</span> <span class="n">target</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">name</span><span class="p">().</span><span class="n">empty</span><span class="p">())</span> <span class="p">{</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">stream</span><span class="o">-&gt;</span><span class="n">WriteStringMaybeAliased</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">_internal_name</span><span class="p">(),</span> <span class="n">target</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">email</span><span class="p">().</span><span class="n">empty</span><span class="p">())</span> <span class="p">{</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">stream</span><span class="o">-&gt;</span><span class="n">WriteStringMaybeAliased</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">_internal_email</span><span class="p">(),</span> <span class="n">target</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="c1">// ...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">Person</span><span class="o">::</span><span class="n">_InternalParse</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">ptr</span><span class="p">,</span> <span class="n">internal</span><span class="o">::</span><span class="n">ParseContext</span><span class="o">*</span> <span class="n">ctx</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">ctx</span><span class="o">-&gt;</span><span class="n">Done</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ptr</span><span class="p">))</span> <span class="p">{</span>
+    <span class="n">uint32</span> <span class="n">tag</span><span class="p">;</span>
+    <span class="n">ptr</span> <span class="o">=</span> <span class="n">internal</span><span class="o">::</span><span class="n">ReadTag</span><span class="p">(</span><span class="n">ptr</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">tag</span><span class="p">);</span>
+
+    <span class="c1">// tag &gt;&gt; 3 得到 field number</span>
+    <span class="c1">// 根据 field number 执行不同的解析方法</span>
+    <span class="k">switch</span> <span class="p">(</span><span class="n">tag</span> <span class="o">&gt;&gt;</span> <span class="mi">3</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">case</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">id_</span> <span class="o">=</span> <span class="n">internal</span><span class="o">::</span><span class="n">ReadVarint64</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ptr</span><span class="p">);</span>
+        <span class="k">break</span><span class="p">;</span>
+      <span class="k">case</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">auto</span> <span class="n">name</span> <span class="o">=</span> <span class="n">_internal_mutable_name</span><span class="p">();</span>
+        <span class="n">ptr</span> <span class="o">=</span> <span class="o">::</span><span class="n">PROTOBUF_NAMESPACE_ID</span><span class="o">::</span><span class="n">internal</span><span class="o">::</span><span class="n">InlineGreedyStringParser</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">ptr</span><span class="p">,</span> <span class="n">ctx</span><span class="p">);</span>
+        <span class="k">break</span><span class="p">;</span>
+      <span class="k">case</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">auto</span> <span class="n">email</span> <span class="o">=</span> <span class="n">_internal_mutable_email</span><span class="p">();</span>
+        <span class="n">ptr</span> <span class="o">=</span> <span class="o">::</span><span class="n">PROTOBUF_NAMESPACE_ID</span><span class="o">::</span><span class="n">internal</span><span class="o">::</span><span class="n">InlineGreedyStringParser</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">ptr</span><span class="p">,</span> <span class="n">ctx</span><span class="p">);</span>
+        <span class="k">break</span><span class="p">;</span>
+      <span class="c1">// ...</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">size_t</span> <span class="n">Person</span><span class="o">::</span><span class="n">ByteSizeLong</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span>
+  <span class="kt">size_t</span> <span class="n">total_size</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">total_size</span> <span class="o">+=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">internal</span><span class="o">::</span><span class="n">WireFormatLite</span><span class="o">::</span><span class="n">Int32Size</span><span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">_internal_id</span><span class="p">());</span>
+  <span class="p">}</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">name</span><span class="p">().</span><span class="n">empty</span><span class="p">())</span> <span class="p">{</span>
+    <span class="n">total_size</span> <span class="o">+=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">internal</span><span class="o">::</span><span class="n">WireFormatLite</span><span class="o">::</span><span class="n">StringSize</span><span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">_internal_name</span><span class="p">());</span>
+  <span class="p">}</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">email</span><span class="p">().</span><span class="n">empty</span><span class="p">())</span> <span class="p">{</span>
+    <span class="n">total_size</span> <span class="o">+=</span> <span class="mi">1</span> <span class="o">+</span> <span class="o">::</span><span class="n">internal</span><span class="o">::</span><span class="n">WireFormatLite</span><span class="o">::</span><span class="n">StringSize</span><span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">_internal_email</span><span class="p">());</span>
+  <span class="p">}</span>
+
+  <span class="c1">// ...</span>
+
+  <span class="kt">int</span> <span class="n">cached_size</span> <span class="o">=</span> <span class="o">::</span><span class="n">internal</span><span class="o">::</span><span class="n">ToCachedSize</span><span class="p">(</span><span class="n">total_size</span><span class="p">);</span>
+  <span class="n">SetCachedSize</span><span class="p">(</span><span class="n">cached_size</span><span class="p">);</span>
+  <span class="k">return</span> <span class="n">total_size</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>值得注意的是 <code class="language-plaintext highlighter-rouge">ByteSizeLong()</code> 方法每次执行都会遍历所有字段，在延迟敏感场景下它对性能带来的影响不可忽视。可以看到上述代码中最后一段执行了 <code class="language-plaintext highlighter-rouge">SetCachedSize()</code> 方法来缓存总大小，这个缓存起来的值需要通过 <code class="language-plaintext highlighter-rouge">GetCachedSize()</code> 获取，在需要时可以调用该方法，但是要注意保证消息没有被改动过。</p>
+
+<h3 id="serialize-接口">Serialize 接口</h3>
+
+<p>PB 对象的基类 <code class="language-plaintext highlighter-rouge">google::protobuf::MessageLite</code> 提供了许多序列化用的方法:</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">MessageLite</span> <span class="p">{</span>
+  <span class="kt">bool</span> <span class="n">SerializeToCodedStream</span><span class="p">(</span><span class="n">io</span><span class="o">::</span><span class="n">CodedOutputStream</span><span class="o">*</span> <span class="n">output</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+  <span class="kt">bool</span> <span class="n">SerializeToZeroCopyStream</span><span class="p">(</span><span class="n">io</span><span class="o">::</span><span class="n">ZeroCopyOutputStream</span><span class="o">*</span> <span class="n">output</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+  <span class="kt">bool</span> <span class="n">SerializeToString</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">*</span> <span class="n">output</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+  <span class="kt">bool</span> <span class="n">SerializeToArray</span><span class="p">(</span><span class="kt">void</span><span class="o">*</span> <span class="n">data</span><span class="p">,</span> <span class="kt">int</span> <span class="n">size</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+  <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">SerializeAsString</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+  <span class="kt">bool</span> <span class="n">SerializeToFileDescriptor</span><span class="p">(</span><span class="kt">int</span> <span class="n">file_descriptor</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+  <span class="kt">bool</span> <span class="n">SerializeToOstream</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">*</span> <span class="n">output</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+  <span class="kt">bool</span> <span class="n">AppendToString</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">*</span> <span class="n">output</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+
+  <span class="c1">// SerializePartial* 系列，与上述方法对应，只是不会检查 required 字段是否被设置</span>
+  <span class="kt">bool</span> <span class="n">SerializePartialToCodedStream</span><span class="p">(</span><span class="n">io</span><span class="o">::</span><span class="n">CodedOutputStream</span><span class="o">*</span> <span class="n">output</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+  <span class="kt">bool</span> <span class="n">SerializePartialToZeroCopyStream</span><span class="p">(</span><span class="n">io</span><span class="o">::</span><span class="n">ZeroCopyOutputStream</span><span class="o">*</span> <span class="n">output</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+  <span class="kt">bool</span> <span class="n">SerializePartialToString</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">*</span> <span class="n">output</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+  <span class="kt">bool</span> <span class="n">SerializePartialToArray</span><span class="p">(</span><span class="kt">void</span><span class="o">*</span> <span class="n">data</span><span class="p">,</span> <span class="kt">int</span> <span class="n">size</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+  <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">SerializePartialAsString</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+  <span class="kt">bool</span> <span class="n">SerializePartialToFileDescriptor</span><span class="p">(</span><span class="kt">int</span> <span class="n">file_descriptor</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+  <span class="kt">bool</span> <span class="n">SerializePartialToOstream</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">*</span> <span class="n">output</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+  <span class="kt">bool</span> <span class="n">AppendPartialToString</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">*</span> <span class="n">output</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>这些序列化方法的输出各有不同，但最终都会转换为 <code class="language-plaintext highlighter-rouge">io::EpsCopyOutputStream</code> 传入给 PB 对象的 <code class="language-plaintext highlighter-rouge">_InternalSerialize()</code> 方法。</p>
+
+<p><img class="mermaid" src="https://mermaid.ink/svg/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG4lJS1cbmNsYXNzIFplcm9Db3B5T3V0cHV0U3RyZWFtIHtcbjw8aW50ZXJmYWNlPj5cbn1cbiUlLVxuY2xhc3MgQXJyYXlPdXRwdXRTdHJlYW1cbmNsYXNzIE9zdHJlYW1PdXRwdXRTdHJlYW1cbmNsYXNzIEZpbGVPdXRwdXRTdHJlYW1cbmNsYXNzIEVwc0NvcHlPdXRwdXRTdHJlYW1cbiUlLVxuWmVyb0NvcHlPdXRwdXRTdHJlYW0gPHwtLSBBcnJheU91dHB1dFN0cmVhbVxuWmVyb0NvcHlPdXRwdXRTdHJlYW0gPHwtLSBPc3RyZWFtT3V0cHV0U3RyZWFtXG5aZXJvQ29weU91dHB1dFN0cmVhbSA8fC0tIEZpbGVPdXRwdXRTdHJlYW1cbkVwc0NvcHlPdXRwdXRTdHJlYW0gLS0-IFplcm9Db3B5T3V0cHV0U3RyZWFtIiwibWVybWFpZCI6bnVsbH0"></p>
+
+<p>上面类图说明了 OutputStream 之间的关系，有若干具体类实现了<code class="language-plaintext highlighter-rouge">ZeroCopyOutputStream</code> 接口，这些具体类分别用于序列化到数组或字符串、<code class="language-plaintext highlighter-rouge">std::ostream</code>、文件描述符。</p>
+
+<p><code class="language-plaintext highlighter-rouge">ZeroCopyOutputStream</code> 接口定义了如何申请和退回内存的逻辑，<code class="language-plaintext highlighter-rouge">EpsCopyOutputStream</code> 调用它的方法申请内存，随后写入各种数据。</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">ZeroCopyOutputStream</span> <span class="p">{</span>
+<span class="nl">public:</span>
+  <span class="c1">// 获取一个可写的内存块，返回这个内存块的地址和大小</span>
+  <span class="c1">// 如果内存块不够大，会再次调用 Next() 去申请</span>
+  <span class="k">virtual</span> <span class="kt">bool</span> <span class="n">Next</span><span class="p">(</span><span class="kt">void</span><span class="o">**</span> <span class="n">data</span><span class="p">,</span> <span class="kt">int</span><span class="o">*</span> <span class="n">size</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+  <span class="c1">// 序列化结束了，退回多余的内存块</span>
+  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">BackUp</span><span class="p">(</span><span class="kt">int</span> <span class="n">count</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+  <span class="c1">// 返回目前已经分配的内存总大小</span>
+  <span class="k">virtual</span> <span class="kt">int64_t</span> <span class="n">ByteCount</span><span class="p">()</span> <span class="k">const</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>值得注意的是用户可以自己实现 <code class="language-plaintext highlighter-rouge">ZeroCopyOutputStream</code> 接口，随后调用 <code class="language-plaintext highlighter-rouge">SerializeToZeroCopyStream()</code> 进行序列化，从而自定义内存分配过程。比如可以每次 <code class="language-plaintext highlighter-rouge">Next()</code> 被调用都分配一块新的内存，最后把 PB 消息序列化到多块内存上。</p>
+
+<h3 id="parse-接口">Parse 接口</h3>
+
+<p>PB 对象的基类 <code class="language-plaintext highlighter-rouge">google::protobuf::MessageLite</code> 提供了许多反序列化用的方法:</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">MessageLite</span> <span class="p">{</span>
+  <span class="kt">bool</span> <span class="n">ParseFromCodedStream</span><span class="p">(</span><span class="n">io</span><span class="o">::</span><span class="n">CodedInputStream</span><span class="o">*</span> <span class="n">input</span><span class="p">);</span>
+  <span class="kt">bool</span> <span class="n">ParseFromZeroCopyStream</span><span class="p">(</span><span class="n">io</span><span class="o">::</span><span class="n">ZeroCopyInputStream</span><span class="o">*</span> <span class="n">input</span><span class="p">);</span>
+  <span class="kt">bool</span> <span class="n">ParseFromFileDescriptor</span><span class="p">(</span><span class="kt">int</span> <span class="n">file_descriptor</span><span class="p">);</span>
+  <span class="kt">bool</span> <span class="n">ParseFromIstream</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">istream</span><span class="o">*</span> <span class="n">input</span><span class="p">);</span>
+  <span class="kt">bool</span> <span class="n">ParseFromString</span><span class="p">(</span><span class="n">ConstStringParam</span> <span class="n">data</span><span class="p">);</span>
+  <span class="kt">bool</span> <span class="n">ParseFromArray</span><span class="p">(</span><span class="k">const</span> <span class="kt">void</span><span class="o">*</span> <span class="n">data</span><span class="p">,</span> <span class="kt">int</span> <span class="n">size</span><span class="p">);</span>
+
+  <span class="c1">// ParsePartialFrom* 系列方法，未列出</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>类似的，可以自行实现 <code class="language-plaintext highlighter-rouge">ZeroCopyInputStream</code> 接口：</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">ZeroCopyInputStream</span> <span class="p">{</span>
+<span class="nl">public:</span>
+  <span class="c1">// 获取一块可供读取的内存</span>
+  <span class="k">virtual</span> <span class="kt">bool</span> <span class="n">Next</span><span class="p">(</span><span class="k">const</span> <span class="kt">void</span><span class="o">**</span> <span class="n">data</span><span class="p">,</span> <span class="kt">int</span><span class="o">*</span> <span class="n">size</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+  <span class="c1">// 上层读取到某个阶段时，发现剩余数据不足以完整读取了，就会退回剩余数据。</span>
+  <span class="c1">// 下次调用 Next() 时需要返回更多数据</span>
+  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">BackUp</span><span class="p">(</span><span class="kt">int</span> <span class="n">count</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+  <span class="c1">// 跳过一部分数据</span>
+  <span class="k">virtual</span> <span class="kt">bool</span> <span class="n">Skip</span><span class="p">(</span><span class="kt">int</span> <span class="n">count</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+  <span class="c1">// 已经提供的内存总大小</span>
+  <span class="k">virtual</span> <span class="kt">int64_t</span> <span class="n">ByteCount</span><span class="p">()</span> <span class="k">const</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+  </div>
+
+  <script src="https://giscus.app/client.js" data-repo="dong-dada/dong-dada.github.io" data-repo-id="R_kgDOMmKAUg" data-category="Comments" data-category-id="DIC_kwDOMmKAUs4Ch6E0" data-mapping="pathname" data-strict="0" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-theme="preferred_color_scheme" data-lang="zh-CN" crossorigin="anonymous" async>
+  </script>
+
+  <a class="u-url" href="/2024/08/21/protobuf-learn.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/%20/"></data>
+
+  <div class="wrapper">
+
+    <!--
+    <h2 class="footer-heading">董哒哒</h2>
+    -->
+
+    <div class="footer-col-wrapper">
+      <!--
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">董哒哒</li>
+        </ul>
+      </div>
+      -->
+
+      <div class="footer-col footer-col-2">
+<ul class="social-media-list">
+<li><a href="https://github.com/dong-dada"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">dong-dada</span></a></li>
+<li><a class="u-email" href="mailto:dongyu_1991@outlook.com"><span class="icon svg-icon"><?xml version="1.0" standalone="no"?><svg t="1724212825924" class="icon" viewbox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1715" xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="16"><path d="M153.236734 163.111422l714.763665 0c48.810633 0 88.718697 38.475467 89.332667 85.853503l-446.458679 242.518237L64.313381 249.169581C64.722694 201.689218 104.323773 163.111422 153.236734 163.111422L153.236734 163.111422zM64.313381 341.981413l-0.409313 429.062856c0 47.787349 40.215049 86.876786 89.332667 86.876786l714.763665 0c49.117618 0 89.332667-39.089437 89.332667-86.876786L957.333067 341.776756 521.311882 573.038873c-6.651344 3.581493-14.735285 3.581493-21.386629 0L64.313381 341.981413 64.313381 341.981413zM64.313381 341.981413" p-id="1716" fill="#828282"></path></svg></span>  <span class="username">dongyu_1991@outlook.com</span></a></li>
+</ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>我哒哒的马蹄是美丽的错误，我不是归人，是个过客</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
